@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import math
 import os
-
+from openpyxl import Workbook
 
 def readUserId(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -17,15 +17,60 @@ def readUserId(df, fileName):
 
         if(columnName==""):
             print ("USER ID not found in ", fileName)
-            return
+            return []
         useridList = df[key].values
         useridList = [x for x in useridList if type(x) is type("str")]
 
         print(useridList)
+        return useridList
 
     except Exception as err:
         print(err)
 
+
+def readFirstName(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*first\s*name.*', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("First Name not found in ", fileName)
+            return []
+        fnList = df[key].values
+        fnList = [x for x in fnList if type(x) is type("str")]
+        print(fnList)
+        return fnList
+
+    except Exception as err:
+        print(err)
+
+def readLastName(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*last\s*name.*', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("Last Name not found in ", fileName)
+            return []
+        lnList = df[key].values
+        lnList = [x for x in lnList if type(x) is type("str")]
+        print(lnList)
+        return lnList
+
+    except Exception as err:
+        print(err)
 
 def readDSId(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -40,13 +85,61 @@ def readDSId(df, fileName):
 
         if(columnName==""):
             print ("DS ID not found in ", fileName)
-            return
+            return []
         dsidList = df[key].values
         dsidList = [x for x in dsidList if type(x) is type("str")]
         print(dsidList)
+        return dsidList
 
     except Exception as err:
         print(err)
+
+
+def readBankUserId(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*bank\s*user\s*id.*', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("Bank User ID not found in ", fileName)
+            return []
+        BUidList = df[key].values
+        BUidList = [x for x in BUidList if type(x) is type("str")]
+        print(BUidList)
+        return BUidList
+
+    except Exception as err:
+        print(err)
+
+def readUserStatus(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*status.*', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("User Status not found in ", fileName)
+            return []
+        statusList = df[key].values
+        statusList = [x for x in statusList if type(x) is type("str")]
+        print(statusList)
+        return statusList
+
+    except Exception as err:
+        print(err)
+
+
 
 def readEmail(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -69,16 +162,18 @@ def readEmail(df, fileName):
                         # print(data)
                         if "@" in data:
                             emailidList.append(data)
-                            print(emailidList)
-            return
+                            # print(emailidList)
+            print(emailidList)
+            return emailidList
 
 
         if(columnName==""):
             print ("Email ID not found in ", fileName)
-            return
+            return []
         emailidList = df[key].values
         emailidList = [x for x in emailidList if type(x) is type("str")]
         print(emailidList)
+        return emailidList
 
     except Exception as err:
         print(err)
@@ -88,13 +183,10 @@ def readxls(filename):
     df = pd.read_excel(filename)
 
     columnNamesList = df.columns.tolist()
+    sheetname = filename.split("_")[0]
+    print(sheetname)
+    writeOutputToFile(df, filename)
 
-    readUserId(df, filename)
-    readDSId(df, filename)
-    readEmail(df, filename)
-    print("Columns List: ", df.columns.tolist())
-    print()
-    print()
     # print(df.head())
 
 def traverseDir(dirPath):
@@ -114,5 +206,75 @@ def traverseDir(dirPath):
             readxls(filePath)
 
 
+def writeOutputToFile(df, filename):
+
+    print("Columns List: ", df.columns.tolist())
+    print()
+    print()
+
+
+
+    workbook = Workbook()
+    sheet = workbook.active
+
+    columnTitle = ("DS ID","USER ID", "USER NAME", "USER EMAIL", "BANK USER ID", "USER STATUS")
+
+    # sheet.append(columnTitle)
+
+    dsIdColumn = readDSId(df, filename)
+    userIdColumn = readUserId(df, filename)
+    emailIdColumn = readEmail(df, filename)
+    first_names = readFirstName(df, filename)
+    last_names = readLastName(df, filename)
+    userNameColumn = []
+    if not first_names == 0 and not last_names == 0:
+        userNameColumn = [first.strip() + " " + last.strip() for first, last in zip(first_names, last_names)]
+    elif not last_names == 0:
+        userNameColumn = first_names
+    else:
+        userNameColumn = last_names
+    bankUserIdColumn = readBankUserId(df, filename)
+    bankName = filename.split("_")[0]
+    userStatus = readUserStatus(df, filename)
+
+    print("PRINTING")
+    print(dsIdColumn)
+    print(userIdColumn)
+    print(emailIdColumn)
+    print(userNameColumn)
+    print(userStatus)
+
+    arrayOfColumns = [dsIdColumn, userIdColumn, userNameColumn, emailIdColumn, bankUserIdColumn, userStatus]
+    print("SAVING DATA FOR " + filename)
+    for col_idx, header in enumerate(columnTitle, start=1):
+        cell = sheet.cell(row=1, column=col_idx)
+        cell.value = header
+
+    for col_idx, column in enumerate(arrayOfColumns, start=1):
+        if (not column):
+            continue
+        else:
+            for row_idx, value in enumerate(column, start=2):
+                cell = sheet.cell(row=row_idx, column=col_idx)
+                cell.value = value
+
+
+    workbook.save('outputFolder/output_'+os.path.basename(filename)+'.xlsx')
+
+
+
 if __name__ == '__main__':
+
+    folder_name = "outputFolder"
+
+    # Specify the path where you want to create the folder
+    path = os.getcwd()
+
+    # Create the full path by combining the parent folder path and the new folder name
+    folder_path = os.path.join(path, folder_name)
+
+    # Use the makedirs() function to create the folder
+    os.makedirs(folder_path)
+    
+
     traverseDir(os.getcwd())
