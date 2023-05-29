@@ -217,7 +217,7 @@ def writeOutputToFile(df, filename):
     workbook = Workbook()
     sheet = workbook.active
 
-    columnTitle = ("DS ID","USER ID", "USER NAME", "USER EMAIL", "BANK USER ID", "USER STATUS")
+    columnTitle = ("DS ID","USER ID", "USER NAME", "USER EMAIL", "BANK USER ID", "USER STATUS", "BANK NAME")
 
     # sheet.append(columnTitle)
 
@@ -234,7 +234,6 @@ def writeOutputToFile(df, filename):
     else:
         userNameColumn = last_names
     bankUserIdColumn = readBankUserId(df, filename)
-    bankName = filename.split("_")[0]
     userStatus = readUserStatus(df, filename)
 
     print("PRINTING")
@@ -245,6 +244,15 @@ def writeOutputToFile(df, filename):
     print(userStatus)
 
     arrayOfColumns = [dsIdColumn, userIdColumn, userNameColumn, emailIdColumn, bankUserIdColumn, userStatus]
+
+    largest_size = max(arrayOfColumns, key=len)
+    size = len(largest_size)
+
+    bankNameArr = []
+    bankNameArr = [os.path.basename(filename)] * size
+    arrayOfColumns.append(bankNameArr)
+
+
     print("SAVING DATA FOR " + filename)
     for col_idx, header in enumerate(columnTitle, start=1):
         cell = sheet.cell(row=1, column=col_idx)
@@ -275,6 +283,6 @@ if __name__ == '__main__':
 
     # Use the makedirs() function to create the folder
     os.makedirs(folder_path)
-    
+
 
     traverseDir(os.getcwd())
