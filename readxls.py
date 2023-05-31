@@ -72,6 +72,30 @@ def readLastName(df, fileName):
     except Exception as err:
         print(err)
 
+
+
+def readFullName(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*full\s*name.*', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("Last Name not found in ", fileName)
+            return []
+        lnList = df[key].values
+        lnList = [x for x in lnList if type(x) is type("str")]
+        print(lnList)
+        return lnList
+
+    except Exception as err:
+        print(err)
+
 def readDSId(df, fileName):
     columnNamesList = df.columns.tolist()
     try:
@@ -90,6 +114,7 @@ def readDSId(df, fileName):
         dsidList = [x for x in dsidList if type(x) is type("str")]
         print(dsidList)
         return dsidList
+
 
     except Exception as err:
         print(err)
@@ -212,27 +237,44 @@ def writeOutputToFile(df, filename):
     print()
     print()
 
-
-
     workbook = Workbook()
     sheet = workbook.active
 
     columnTitle = ("DS ID","USER ID", "USER NAME", "USER EMAIL", "BANK USER ID", "USER STATUS", "BANK NAME")
 
     # sheet.append(columnTitle)
-
+    dsIdColumn = []
     dsIdColumn = readDSId(df, filename)
+    userIdColumn = []
     userIdColumn = readUserId(df, filename)
+
+    index = 0
+    for id in userIdColumn:
+        if not id[0].isdigit() and id[1].isdigit() or len(id) <= 9:
+            if (index >= len(dsIdColumn)):
+                dsIdColumn.append("")
+            dsIdColumn[index] = id
+            userIdColumn[index] = ""
+        else:
+            if (index >= len(dsIdColumn)):
+                dsIdColumn.append("")
+        index = index + 1
+
     emailIdColumn = readEmail(df, filename)
     first_names = readFirstName(df, filename)
     last_names = readLastName(df, filename)
+    fullNameCol = readFullName(df, filename)
+
     userNameColumn = []
-    if not first_names == 0 and not last_names == 0:
-        userNameColumn = [first.strip() + " " + last.strip() for first, last in zip(first_names, last_names)]
-    elif not last_names == 0:
-        userNameColumn = first_names
+    if(len(fullNameCol)==0):
+        if not first_names == 0 and not last_names == 0:
+            userNameColumn = [first.strip() + " " + last.strip() for first, last in zip(first_names, last_names)]
+        elif not last_names == 0:
+            userNameColumn = first_names
+        else:
+            userNameColumn = last_names
     else:
-        userNameColumn = last_names
+        userNameColumn = fullNameCol
     bankUserIdColumn = readBankUserId(df, filename)
     userStatus = readUserStatus(df, filename)
 
@@ -267,7 +309,7 @@ def writeOutputToFile(df, filename):
                 cell.value = value
 
 
-    workbook.save('outputFolder/output_'+os.path.basename(filename)+'.xlsx')
+    workbook.save('outputFolder/output_'+os.path.basename(filename))
 
 
 
