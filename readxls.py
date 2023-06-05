@@ -120,27 +120,27 @@ def readDSId(df, fileName):
         print(err)
 
 
-def readBankUserId(df, fileName):
-    columnNamesList = df.columns.tolist()
-    try:
-        pattern = re.compile(r'.*bank\s*user\s*id.*', re.IGNORECASE)
-        columnName = ""
-        for key in columnNamesList:
-            if pattern.search(key):
-                print(key)
-                columnName = key
-                break
-
-        if(columnName==""):
-            print ("Bank User ID not found in ", fileName)
-            return []
-        BUidList = df[key].values
-        BUidList = [x for x in BUidList if type(x) is type("str")]
-        print(BUidList)
-        return BUidList
-
-    except Exception as err:
-        print(err)
+# def readBankUserId(df, fileName):
+#     columnNamesList = df.columns.tolist()
+#     try:
+#         pattern = re.compile(r'.*bank\s*user\s*id.*', re.IGNORECASE)
+#         columnName = ""
+#         for key in columnNamesList:
+#             if pattern.search(key):
+#                 print(key)
+#                 columnName = key
+#                 break
+#
+#         if(columnName==""):
+#             print ("Bank User ID not found in ", fileName)
+#             return []
+#         BUidList = df[key].values
+#         BUidList = [x for x in BUidList if type(x) is type("str")]
+#         print(BUidList)
+#         return BUidList
+#
+#     except Exception as err:
+#         print(err)
 
 def readUserStatus(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -240,7 +240,7 @@ def writeOutputToFile(df, filename):
     workbook = Workbook()
     sheet = workbook.active
 
-    columnTitle = ("DS ID","USER ID", "USER NAME", "USER EMAIL", "BANK USER ID", "USER STATUS", "BANK NAME")
+    columnTitle = ("DS ID","BANK USER ID", "USER NAME", "USER EMAIL", "USER STATUS", "BANK NAME")
 
     # sheet.append(columnTitle)
     dsIdColumn = []
@@ -275,7 +275,7 @@ def writeOutputToFile(df, filename):
             userNameColumn = last_names
     else:
         userNameColumn = fullNameCol
-    bankUserIdColumn = readBankUserId(df, filename)
+    # bankUserIdColumn = readBankUserId(df, filename)
     userStatus = readUserStatus(df, filename)
 
     print("PRINTING")
@@ -285,7 +285,7 @@ def writeOutputToFile(df, filename):
     print(userNameColumn)
     print(userStatus)
 
-    arrayOfColumns = [dsIdColumn, userIdColumn, userNameColumn, emailIdColumn, bankUserIdColumn, userStatus]
+    arrayOfColumns = [dsIdColumn, userIdColumn, userNameColumn, emailIdColumn, userStatus]
 
     largest_size = max(arrayOfColumns, key=len)
     size = len(largest_size)
