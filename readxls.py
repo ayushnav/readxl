@@ -27,7 +27,6 @@ def readUserId(df, fileName):
     except Exception as err:
         print(err)
 
-
 def readFirstName(df, fileName):
     columnNamesList = df.columns.tolist()
     try:
@@ -72,12 +71,10 @@ def readLastName(df, fileName):
     except Exception as err:
         print(err)
 
-
-
 def readFullName(df, fileName):
     columnNamesList = df.columns.tolist()
     try:
-        pattern = re.compile(r'.*full\s*name.*', re.IGNORECASE)
+        pattern = re.compile(r'.*name.*', re.IGNORECASE)
         columnName = ""
         for key in columnNamesList:
             if pattern.search(key):
@@ -86,7 +83,7 @@ def readFullName(df, fileName):
                 break
 
         if(columnName==""):
-            print ("Last Name not found in ", fileName)
+            print ("Full Name not found in ", fileName)
             return []
         lnList = df[key].values
         lnList = [x for x in lnList if type(x) is type("str")]
@@ -119,6 +116,28 @@ def readDSId(df, fileName):
     except Exception as err:
         print(err)
 
+def readCargillId(df, fileName):
+    columnNamesList = df.columns.tolist()
+    try:
+        pattern = re.compile(r'.*car.', re.IGNORECASE)
+        columnName = ""
+        for key in columnNamesList:
+            if pattern.search(key):
+                print(key)
+                columnName = key
+                break
+
+        if(columnName==""):
+            print ("Cargill ID not found in ", fileName)
+            return []
+        dsidList = df[key].values
+        dsidList = [x for x in dsidList if type(x) is type("str")]
+        print(dsidList)
+        return dsidList
+
+
+    except Exception as err:
+        print(err)
 
 # def readBankUserId(df, fileName):
 #     columnNamesList = df.columns.tolist()
@@ -164,8 +183,6 @@ def readUserStatus(df, fileName):
     except Exception as err:
         print(err)
 
-
-
 def readEmail(df, fileName):
     columnNamesList = df.columns.tolist()
     emailidList = []
@@ -180,12 +197,14 @@ def readEmail(df, fileName):
                 break
         if columnName=="":
             for col_name in df.columns:
+                # if "manager" in col_name:
+                    # continue
                 col_data = df[col_name]
 
                 for data in col_data:
                     if(type(data) == type("str")):
                         # print(data)
-                        if "@" in data:
+                        if "@cargill.com" in data or "@fisglobal.com" in data or "@crgl-thirdparty.com" in data or "@diamondv.com" in data or "@py.ey.com" in data:
                             emailidList.append(data)
                             # print(emailidList)
             print(emailidList)
@@ -212,8 +231,6 @@ def readxls(filename):
     print(sheetname)
     writeOutputToFile(df, filename)
 
-    # print(df.head())
-
 def traverseDir(dirPath):
 
 # List to hold all Excel data frames
@@ -230,7 +247,6 @@ def traverseDir(dirPath):
             print(fileName)
             readxls(filePath)
 
-
 def writeOutputToFile(df, filename):
 
     print("Columns List: ", df.columns.tolist())
@@ -245,6 +261,9 @@ def writeOutputToFile(df, filename):
     # sheet.append(columnTitle)
     dsIdColumn = []
     dsIdColumn = readDSId(df, filename)
+    if len(dsIdColumn) == 0:
+        dsIdColumn = readCargillId(df, filename)
+    
     userIdColumn = []
     userIdColumn = readUserId(df, filename)
 
@@ -310,8 +329,6 @@ def writeOutputToFile(df, filename):
 
 
     workbook.save('outputFolder/output_'+os.path.basename(filename))
-
-
 
 if __name__ == '__main__':
 
