@@ -7,7 +7,7 @@ from openpyxl import Workbook
 def readUserId(df, fileName):
     columnNamesList = df.columns.tolist()
     try:
-        pattern = re.compile(r'.*user\s*id.*', re.IGNORECASE)
+        pattern = re.compile(r'.*user\s*id.*|User Alias|app id|bank user id|bank id', re.IGNORECASE)
         columnName = ""
         for key in columnNamesList:
             if pattern.search(key):
@@ -71,12 +71,36 @@ def readLastName(df, fileName):
     except Exception as err:
         print(err)
 
+# def readFullName(df, fileName): 
+#     columnNamesList = df.columns.tolist()
+#     try:
+#         pattern = re.compile(r'.*name.*', re.IGNORECASE)
+#         columnName = ""
+#         for key in columnNamesList:
+#             if pattern.search(key):
+#                 print(key)
+#                 columnName = key
+#                 break
+
+#         if(columnName==""):
+#             print ("Full Name not found in ", fileName)
+#             return []
+#         lnList = df[key].values
+#         lnList = [x for x in lnList if type(x) is type("str")]
+#         print(lnList)
+#         return lnList
+
+#     except Exception as err:
+#         print(err)
+
 def readFullName(df, fileName):
     columnNamesList = df.columns.tolist()
     try:
-        pattern = re.compile(r'.*name.*', re.IGNORECASE)
+        pattern = re.compile(r'name|nombre', re.IGNORECASE)
         columnName = ""
         for key in columnNamesList:
+            if ("Unnamed" in key):
+                continue
             if pattern.search(key):
                 print(key)
                 columnName = key
@@ -85,6 +109,7 @@ def readFullName(df, fileName):
         if(columnName==""):
             print ("Full Name not found in ", fileName)
             return []
+        print(df[key])
         lnList = df[key].values
         lnList = [x for x in lnList if type(x) is type("str")]
         print(lnList)
@@ -230,6 +255,15 @@ def readxls(filename):
     sheetname = filename.split("_")[0]
     print(sheetname)
     writeOutputToFile(df, filename)
+    
+def readcsv(filename):
+
+    df = pd.read_csv(filename, delimiter=';')
+
+    columnNamesList = df.columns.tolist()
+    sheetname = filename.split("_")[0]
+    print(sheetname)
+    writeOutputToFile(df, filename)
 
 def traverseDir(dirPath):
 
@@ -246,6 +280,10 @@ def traverseDir(dirPath):
             filePath = os.path.join(dirPath, fileName)
             print(fileName)
             readxls(filePath)
+        if (fileName.endswith(".csv")):
+            filePath = os.path.join(dirPath, fileName)
+            print(fileName)
+            readcsv(filePath)
 
 def writeOutputToFile(df, filename):
 
@@ -270,10 +308,12 @@ def writeOutputToFile(df, filename):
     index = 0
     for id in userIdColumn:
         if not id[0].isdigit() and id[1].isdigit() or len(id) <= 9:
-            if (index >= len(dsIdColumn)):
-                dsIdColumn.append("")
-            dsIdColumn[index] = id
-            userIdColumn[index] = ""
+            # if (index >= len(dsIdColumn)):
+            #     dsIdColumn.append("")
+            
+            # dsIdColumn[index] = id
+            # userIdColumn[index] = ""
+            dsIdColumn = userIdColumn
         else:
             if (index >= len(dsIdColumn)):
                 dsIdColumn.append("")
@@ -286,9 +326,9 @@ def writeOutputToFile(df, filename):
 
     userNameColumn = []
     if(len(fullNameCol)==0):
-        if not first_names == 0 and not last_names == 0:
+        if not len(first_names) == 0 and not len(last_names) == 0:
             userNameColumn = [first.strip() + " " + last.strip() for first, last in zip(first_names, last_names)]
-        elif not last_names == 0:
+        elif not len(last_names) == 0:
             userNameColumn = first_names
         else:
             userNameColumn = last_names
@@ -327,8 +367,10 @@ def writeOutputToFile(df, filename):
                 cell = sheet.cell(row=row_idx, column=col_idx)
                 cell.value = value
 
-
-    workbook.save('outputFolder/output_'+os.path.basename(filename))
+    if (filename.endswith(".csv")):
+        workbook.save('outputFolder/output_'+os.path.basename(filename)+'.xlsx')
+    else:
+        workbook.save('outputFolder/output_'+os.path.basename(filename))
 
 if __name__ == '__main__':
 
