@@ -71,27 +71,6 @@ def readLastName(df, fileName):
     except Exception as err:
         print(err)
 
-# def readFullName(df, fileName): 
-#     columnNamesList = df.columns.tolist()
-#     try:
-#         pattern = re.compile(r'.*name.*', re.IGNORECASE)
-#         columnName = ""
-#         for key in columnNamesList:
-#             if pattern.search(key):
-#                 print(key)
-#                 columnName = key
-#                 break
-
-#         if(columnName==""):
-#             print ("Full Name not found in ", fileName)
-#             return []
-#         lnList = df[key].values
-#         lnList = [x for x in lnList if type(x) is type("str")]
-#         print(lnList)
-#         return lnList
-
-#     except Exception as err:
-#         print(err)
 
 def readFullName(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -164,27 +143,6 @@ def readCargillId(df, fileName):
     except Exception as err:
         print(err)
 
-# def readBankUserId(df, fileName):
-#     columnNamesList = df.columns.tolist()
-#     try:
-#         pattern = re.compile(r'.*bank\s*user\s*id.*', re.IGNORECASE)
-#         columnName = ""
-#         for key in columnNamesList:
-#             if pattern.search(key):
-#                 print(key)
-#                 columnName = key
-#                 break
-#
-#         if(columnName==""):
-#             print ("Bank User ID not found in ", fileName)
-#             return []
-#         BUidList = df[key].values
-#         BUidList = [x for x in BUidList if type(x) is type("str")]
-#         print(BUidList)
-#         return BUidList
-#
-#     except Exception as err:
-#         print(err)
 
 def readUserStatus(df, fileName):
     columnNamesList = df.columns.tolist()
@@ -229,7 +187,7 @@ def readEmail(df, fileName):
                 for data in col_data:
                     if(type(data) == type("str")):
                         # print(data)
-                        if "@cargill.com" in data or "@fisglobal.com" in data or "@crgl-thirdparty.com" in data or "@diamondv.com" in data or "@py.ey.com" in data:
+                        if "@cargill.com" in data or "@fisglobal.com" in data or "@crgl-thirdparty.com" in data or "@diamondv.com" in data or "@py.ey.com" in data or "CRGL-THIRDPARTY.COM" in data or "proaoass.com" in data:
                             emailidList.append(data)
                             # print(emailidList)
             print(emailidList)
@@ -247,6 +205,7 @@ def readEmail(df, fileName):
     except Exception as err:
         print(err)
 
+#traverses present working directory and find excels
 def readxls(filename):
 
     df = pd.read_excel(filename)
@@ -256,6 +215,7 @@ def readxls(filename):
     print(sheetname)
     writeOutputToFile(df, filename)
     
+#traverses present working directory and find CSVs
 def readcsv(filename):
 
     df = pd.read_csv(filename, delimiter=';')
@@ -265,6 +225,7 @@ def readcsv(filename):
     print(sheetname)
     writeOutputToFile(df, filename)
 
+#Traverses present working directory
 def traverseDir(dirPath):
 
 # List to hold all Excel data frames
@@ -285,6 +246,7 @@ def traverseDir(dirPath):
             print(fileName)
             readcsv(filePath)
 
+#Writes final output to files
 def writeOutputToFile(df, filename):
 
     print("Columns List: ", df.columns.tolist())
@@ -296,7 +258,6 @@ def writeOutputToFile(df, filename):
 
     columnTitle = ("DS ID","BANK USER ID", "USER NAME", "USER EMAIL", "USER STATUS", "BANK NAME")
 
-    # sheet.append(columnTitle)
     dsIdColumn = []
     dsIdColumn = readDSId(df, filename)
     if len(dsIdColumn) == 0:
@@ -328,7 +289,7 @@ def writeOutputToFile(df, filename):
     if(len(fullNameCol)==0):
         if not len(first_names) == 0 and not len(last_names) == 0:
             userNameColumn = [first.strip() + " " + last.strip() for first, last in zip(first_names, last_names)]
-        elif not len(last_names) == 0:
+        elif len(last_names) == 0:
             userNameColumn = first_names
         else:
             userNameColumn = last_names
@@ -384,6 +345,5 @@ if __name__ == '__main__':
 
     # Use the makedirs() function to create the folder
     os.makedirs(folder_path)
-
 
     traverseDir(os.getcwd())
